@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap"
+    />
+    <style>
+      body {
+        font-family: 'Montserrat', sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #fce38a, #f38181);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: 100vh;
+        transition: background 0.2s linear, color 0.2s linear;
+        color: #4a5568; /* Default text color for light mode */
+      }
+
+      body.dark {
+        background: linear-gradient(135deg, #485563, #29323c);
+        color: #020202; /* Text color for dark mode */
+      }
+
+      body.light {
+        background: linear-gradient(135deg, #fce38a, #f38181);
+      }
+
+      body h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+      }
+
+      body.dark h1,
+      body.dark .support a {
+        color: #000000;
+      }
+
+      .weather-app {
+        position: relative;
+        width: 300px;
+        background-color: #f8f8f8;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .search {
+        padding: 20px;
+        text-align: center;
+        background-color: #90cdf4;
+        color: #fff;
+      }
+
+      input {
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        width: 70%;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        display: inline-block;
+        outline: none;
+      }
+
+      button {
+        background-color: #fff;
+        border: none;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 5px;
+        width: 25%;
+        display: inline-block;
+        outline: none;
+      }
+
+      #errorContainer {
+        padding: 10px;
+        background-color: #f56565;
+        color: #fff;
+        display: none;
+        text-align: center;
+      }
+
+      .weather-info {
+        padding: 20px;
+        display: none;
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+      }
+
+      .weather-icon {
+        font-size: 2em;
+        margin-bottom: 10px;
+        color: #4a5568;
+      }
+
+      .details {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .weather-detail {
+        margin-top: 15px;
+        text-align: center;
+        color: #4a5568;
+      }
+
+      .detail-label {
+        font-size: 12px;
+        color: #718096;
+      }
+
+      /* Dark Mode */
+      .toggle-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 5px;
+        outline: none;
+      }
+
+      .toggle-button i {
+        font-size: 1.5em;
+      }
+
+      /* Light/Dark Toggle Button Styling */
+      .checkbox {
+        opacity: 0;
+        position: absolute;
+      }
+
+      .checkbox-label {
+        background-color: #111;
+        width: 50px;
+        height: 26px;
+        border-radius: 50px;
+        position: relative;
+        padding: 5px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        outline: none;
+      }
+
+      .fa-moon {
+        color: #f1c40f;
+      }
+
+      .fa-sun {
+        color: #f39c12;
+      }
+
+      .checkbox-label .ball {
+        background-color: #fff;
+        width: 22px;
+        height: 22px;
+        position: absolute;
+        left: 2px;
+        top: 2px;
+        border-radius: 50%;
+        transition: transform 0.2s linear;
+      }
+
+      .checkbox:checked + .checkbox-label .ball {
+        transform: translateX(24px);
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Weather Application</h1>
+    <button class="toggle-button" id="toggleDarkModeBtn">
+      <i class="fas fa-moon"></i>
+    </button>
+    <div class="weather-app">
+      <div class="search">
+        <input
+          type="text"
+          id="cityInput"
+          placeholder="Enter city name"
+          spellcheck="false"
+          class="bg-gray-100 p-2 text-gray-800 rounded-l-md focus:outline-none mb-2"
+        />
+        <button
+          type="button"
+          id="searchBtn"
+          class="bg-blue-500 text-white rounded-r-md hover:bg-blue-600 mb-6 mt-2"
+        >
+          <i class="fas fa-search py-2"></i>
+        </button>
+      </div>
+      <div class="error hidden" id="errorContainer">
+        <p id="errorMessage">Invalid city name</p>
+      </div>
+      <div class="weather-info" id="weatherContainer">
+        <div class="flex flex-col items-center">
+          <i class="fas fa-cloud-sun-rain weather-icon text-blue-500"></i>
+          <h1 class="temperature text-4xl font-bold text-gray-800">22°C</h1>
+          <h2 class="city text-xl font-semibold text-gray-700">New York</h2>
+        </div>
+        <div class="details mt-4">
+          <div class="weather-detail">
+            <i class="fas fa-tint text-blue-500"></i>
+            <div>
+              <p class="humidity text-lg font-medium text-gray-800">50%</p>
+              <p class="detail-label">Humidity</p>
+            </div>
+          </div>
+          <div class="weather-detail">
+            <i class="fas fa-wind text-blue-500"></i>
+            <div>
+              <p class="wind-speed text-lg font-medium text-gray-800">
+                15 km/h
+              </p>
+              <p class="detail-label">Wind Speed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const apiKey = 'ADD_YOUR_API_OPEN_WEATHER';
+      const apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=';
+
+      const cityInput = document.getElementById('cityInput');
+      const searchBtn = document.getElementById('searchBtn');
+      const toggleDarkModeBtn = document.getElementById('toggleDarkModeBtn');
+      const weatherIcon = document.querySelector('.weather-icon');
+      const errorContainer = document.getElementById('errorContainer');
+      const errorMessage = document.getElementById('errorMessage');
+      const weatherContainer = document.getElementById('weatherContainer');
+      const body = document.body;
+      const checkbox = document.getElementById('checkbox');
+
+      function toggleDarkMode() {
+        body.classList.toggle('dark');
+        const isDarkMode = body.classList.contains('dark');
+        toggleDarkModeBtn.innerHTML = `<i class="fas fa-${
+          isDarkMode ? 'moon' : 'sun'
+        }"></i>`;
+      }
+
+      toggleDarkModeBtn.addEventListener('click', toggleDarkMode);
+
+      async function getWeather(city) {
+        try {
+          const response = await fetch(
+            `${apiUrl}${city}&appid=${apiKey}&units=metric`
+          );
+          const data = await response.json();
+
+          if (response.ok) {
+            displayWeather(data);
+            hideError();
+          } else {
+            showError('City not found');
+          }
+        } catch (error) {
+          showError('An error occurred while fetching the weather');
+        }
+      }
+
+      function displayWeather(data) {
+        document.querySelector('.city').textContent = data.name;
+        document.querySelector('.temperature').textContent =
+          Math.round(data.main.temp) + '°C';
+        document.querySelector('.humidity').textContent =
+          data.main.humidity + '%';
+        document.querySelector('.wind-speed').textContent =
+          data.wind.speed + ' km/h';
+
+        setWeatherIcon(data.weather[0].main);
+        weatherContainer.style.display = 'block';
+      }
+
+      function setWeatherIcon(weatherCondition) {
+        const iconMap = {
+          Clouds: 'images/cloud.png',
+          Clear: 'images/clear.png',
+          Rain: 'images/rain.gif',
+          Drizzle: 'images/drizzle.png',
+          Mist: 'images/mist.png',
+        };
+
+        weatherIcon.src =
+          iconMap[weatherCondition] || 'images/default-weather.png';
+      }
+
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorContainer.style.display = 'block';
+        weatherContainer.style.display = 'none';
+      }
+
+      function hideError() {
+        errorContainer.style.display = 'none';
+      }
+
+      if (searchBtn) {
+        searchBtn.addEventListener('click', () => {
+          const cityName = cityInput.value.trim();
+          if (cityName !== '') {
+            getWeather(cityName);
+          } else {
+            showError('Please enter a city name');
+          }
+        });
+      } else {
+        console.error('Element with id "searchBtn" not found.');
+      }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </body>
+</html>
